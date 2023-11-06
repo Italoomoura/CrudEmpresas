@@ -10,6 +10,31 @@ export const getEmpresas = (_, res) => {
     })
 }
 
+export const searchEmpresaByCNPJ = async (req, res) => {
+  try {
+    const cnpj = decodeURIComponent(req.params.cnpj);
+    console.log("Pesquisando empresa por CNPJ:", cnpj);
+    const q = "SELECT * FROM empresas WHERE cnpj = ?";
+
+    db.query(q, [cnpj], (err, data) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ message: "Erro ao buscar a empresa por CNPJ." });
+      }
+
+      if (data.length > 0) {
+        return res.status(200).json(data[0]);
+      } else {
+        return res.status(404).json({ message: "Empresa não encontrada." });
+      }
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Erro ao buscar a empresa por CNPJ." });
+  }
+};
+
+
 export const addEmpresa = (req, res) => {
     const q = "INSERT INTO empresas(`nomeCliente`, `senha`, `nomeEmpresa`, `cnpj`, `cep`, `endereco`, `numero`, `telefone`, `email`) VALUES(?)";
   
@@ -28,11 +53,11 @@ export const addEmpresa = (req, res) => {
     db.query(q, [values], (err) => {
         if (err) return res.json(err);
     
-        return res.status(200).json("Empresa criada com sucesso.");
+        return res.status(400).json("Empresa criada com sucesso.");
     });
 };
 
-export const updateEmpresa = (req, res) => {
+export const updateEmpresa = (req, res) => {  
     const q =
     "UPDATE empresas SET `nomeCliente` = ?, `senha` = ?, `nomeEmpresa` = ?, `cnpj` = ?, `cep` = ?, `endereco` = ?, `numero` = ?, `telefone` = ?, `email` = ? WHERE `id` = ?";
 

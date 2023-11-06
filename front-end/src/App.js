@@ -2,6 +2,7 @@ import GlobalStyle from "./styles/global";
 import styled from "styled-components";
 import Form from "./components/Form.js";
 import Grid from "./components/Grid.js";
+import Search from "./components/Search.js";
 import { useEffect, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -41,6 +42,7 @@ function App() {
       <Container>
           <Title>CRUD de Empresas</Title>
           <Form onEdit={onEdit} setOnEdit={setOnEdit} getEmpresas={getEmpresas}/>
+          <Search empresas={empresas} onEdit={onEdit} setOnEdit={setOnEdit} getEmpresas={getEmpresas} setEmpresas={setEmpresas}></Search>
           <Grid empresas={empresas} setEmpresas={setEmpresas} setOnEdit={setOnEdit}/>
       </Container>
       <ToastContainer autoClose={3000} position={toast.POSITION.BOTTOM_LEFT} />

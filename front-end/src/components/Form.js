@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from "react";
 import styled from "styled-components";
 import axios from "axios";
+import InputMask from "react-input-mask";
 import { Toast, ToastContainer, toast } from "react-toastify";
 
 const FomrContainer = styled.form`
@@ -40,6 +41,69 @@ const Button = styled.button`
 `;
 
 const Form = ({ getEmpresas, onEdit, setOnEdit }) => {
+
+    function isCnpjValid(cnpj) {
+        cnpj = cnpj.replace(/[^\d]+/g, '');
+      
+        if (cnpj.length !== 14) {
+          return false;
+        }
+      
+        if (
+          cnpj === '00000000000000' ||
+          cnpj === '11111111111111' ||
+          cnpj === '22222222222222' ||
+          cnpj === '33333333333333' ||
+          cnpj === '44444444444444' ||
+          cnpj === '55555555555555' ||
+          cnpj === '66666666666666' ||
+          cnpj === '77777777777777' ||
+          cnpj === '88888888888888' ||
+          cnpj === '99999999999999'
+        ) {
+          return false;
+        }
+      
+        let size = cnpj.length - 2;
+        let numbers = cnpj.substring(0, size);
+        const digits = cnpj.substring(size);
+        let sum = 0;
+        let pos = size - 7;
+      
+        for (let i = size; i >= 1; i--) {
+          sum += numbers.charAt(size - i) * pos--;
+          if (pos < 2) {
+            pos = 9;
+          }
+        }
+      
+        let result = sum % 11 < 2 ? 0 : 11 - (sum % 11);
+      
+        if (result !== Number(digits.charAt(0))) {
+          return false;
+        }
+      
+        size = size + 1;
+        numbers = cnpj.substring(0, size);
+        sum = 0;
+        pos = size - 7;
+      
+        for (let i = size; i >= 1; i--) {
+          sum += numbers.charAt(size - i) * pos--;
+          if (pos < 2) {
+            pos = 9;
+          }
+        }
+      
+        result = sum % 11 < 2 ? 0 : 11 - (sum % 11);
+      
+        if (result !== Number(digits.charAt(1))) {
+          return false;
+        }
+      
+        return true;
+    }
+
     const ref = useRef();
 
     useEffect(() => {
@@ -57,11 +121,26 @@ const Form = ({ getEmpresas, onEdit, setOnEdit }) => {
             empresa.email.value = onEdit.email;
         }
     }, [onEdit]);
+      
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         const empresa = ref.current;
+
+        if (
+            !empresa.nomeCliente.value ||
+            !empresa.senha.value ||
+            !empresa.nomeEmpresa.value ||
+            !empresa.cnpj.value ||
+            !empresa.cep.value ||
+            !empresa.endereco.value ||
+            !empresa.numero.value ||
+            !empresa.telefone.value ||
+            !empresa.email.value
+        ) {
+            return toast.warn("Preencha todos os campos corretamente!");
+        }
 
         if(
             !empresa.nomeCliente.value ||
@@ -75,6 +154,10 @@ const Form = ({ getEmpresas, onEdit, setOnEdit }) => {
             !empresa.email.value
         ){
             return toast.warn("Preencha todos os campos!");
+        }
+        
+        if (!isCnpjValid(empresa.cnpj.value)) {
+            return toast.warn("CNPJ inválido");
         }
 
         if(onEdit){
@@ -139,11 +222,15 @@ const Form = ({ getEmpresas, onEdit, setOnEdit }) => {
             </InputArea>
             <InputArea>
                 <Label>CNPJ</Label>
-                <Input name="cnpj" />
+                <InputMask mask="99.999.999/9999-99" maskPlaceholder="" name="cnpj">
+                    {(inputProps) => <Input {...inputProps} />}
+                </InputMask>
             </InputArea>
             <InputArea>
-                <Label>CEP</Label>
-                <Input name="cep" />
+            <Label>CEP</Label>
+                <InputMask mask="99999-999" maskPlaceholder="" name="cep">
+                    {(inputProps) => <Input {...inputProps} />}
+                </InputMask>
             </InputArea>
             <InputArea>
                 <Label>Endereço</Label>
@@ -155,7 +242,9 @@ const Form = ({ getEmpresas, onEdit, setOnEdit }) => {
             </InputArea>
             <InputArea>
                 <Label>Telefone</Label>
-                <Input name="telefone" />
+                <InputMask mask="+55 (99) 99999-9999" maskPlaceholder="" name="telefone">
+                    {(inputProps) => <Input {...inputProps} />}
+                </InputMask>
             </InputArea>
             <InputArea>
                 <Label>Email</Label>
