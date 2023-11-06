@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import styled from "styled-components";
 import axios from "axios";
 import InputMask from "react-input-mask";
@@ -104,6 +104,13 @@ const Form = ({ getEmpresas, onEdit, setOnEdit }) => {
         return true;
     }
 
+    const [enderecoInfo, setEndereco] = useState({
+        logradouro: "",
+        bairro: "",
+        localidade: "",
+        uf: "",
+    });
+
     const ref = useRef();
 
     useEffect(() => {
@@ -121,6 +128,26 @@ const Form = ({ getEmpresas, onEdit, setOnEdit }) => {
             empresa.email.value = onEdit.email;
         }
     }, [onEdit]);
+    
+    const buscarEndereco = async (cep) => {
+        try {
+          const response = await axios.get(`https://viacep.com.br/ws/${cep}/json/`);
+          const data = response.data;
+      
+          if (!data.erro) {
+            setEndereco({
+              logradouro: data.logradouro,
+              bairro: data.bairro,
+              localidade: data.localidade,
+              uf: data.uf,
+            });
+          } else {
+            toast.error("CEP não encontrado");
+          }
+        } catch (error) {
+          toast.error("Erro ao buscar o CEP");
+        }
+    };
       
 
     const handleSubmit = async (e) => {
@@ -228,13 +255,17 @@ const Form = ({ getEmpresas, onEdit, setOnEdit }) => {
             </InputArea>
             <InputArea>
             <Label>CEP</Label>
-                <InputMask mask="99999-999" maskPlaceholder="" name="cep">
+                <InputMask mask="99999-999" maskPlaceholder="" name="cep" onBlur={(e) => buscarEndereco(e.target.value.replace("-", ""))}>
                     {(inputProps) => <Input {...inputProps} />}
                 </InputMask>
             </InputArea>
             <InputArea>
                 <Label>Endereço</Label>
-                <Input name="endereco" />
+                <Input 
+                    name="endereco"
+                    value={`${enderecoInfo.logradouro}, ${enderecoInfo.bairro}, ${enderecoInfo.localidade} - ${enderecoInfo.uf}`}
+                    onChange={() => {}}
+                />
             </InputArea>
             <InputArea>
                 <Label>Número</Label>
